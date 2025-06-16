@@ -428,14 +428,19 @@ typedef NS_ENUM(NSUInteger, FLEXExplorerMode) {
     [self toggleViewsTool];
 }
 
-- (UIWindow *)statusWindow {
-    if (!@available(iOS 16, *)) {
-        NSString *statusBarString = [NSString stringWithFormat:@"%@arWindow", @"_statusB"];
-        return [UIApplication.sharedApplication valueForKey:statusBarString];
-    }
-    
-    return nil;
+-- (UIWindow *)statusWindow {
+    static UIWindow *flexWindow = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        flexWindow = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+        flexWindow.windowLevel = UIWindowLevelNormal + 1; // nicht zu hoch
+        flexWindow.rootViewController = [UIViewController new];
+        flexWindow.backgroundColor = [UIColor clearColor];
+        [flexWindow makeKeyAndVisible];
+    });
+    return flexWindow;
 }
+
 
 - (void)recentButtonTapped:(FLEXExplorerToolbarItem *)sender {
     NSAssert(FLEXTabList.sharedList.activeTab, @"Must have active tab");
